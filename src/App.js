@@ -192,14 +192,14 @@ function playConflict(homeTeam, awayTeam, tieLimit = 3)
   if (getTeamRanking(homeTeam) > getTeamRanking(awayTeam))
   {
     //Hometeam is weaker, awayteam is stronger.
-    homeResult = (Math.floor(Math.random()*18))+1 - getTeamRanking(homeTeam);
-    awayResult = (Math.floor(Math.random()*20))+1 - getTeamRanking(awayTeam);
+    homeResult = (Math.floor(Math.random()*20))+1 - getTeamRanking(homeTeam);
+    awayResult = (Math.floor(Math.random()*18))+1 - getTeamRanking(awayTeam);
   }
   else
   {
     //Hometeam is stronger, awayteam is weaker.
-    homeResult = (Math.floor(Math.random()*20))+1 - getTeamRanking(homeTeam);
-    awayResult = (Math.floor(Math.random()*18))+1 - getTeamRanking(awayTeam);
+    homeResult = (Math.floor(Math.random()*18))+1 - getTeamRanking(homeTeam);
+    awayResult = (Math.floor(Math.random()*20))+1 - getTeamRanking(awayTeam);
   }
 
   //If the team performance <= tieLimit, the period is declared a tie. This is a little artificial
@@ -393,8 +393,6 @@ function playMatch(oneTeam, otherTeam, stage)
   finalScore.away = periodsScore.away;
 
   //If the game is a tie, play an extra overtime period.
-  //TODO: If "stage" is "final" (i.e. it's the final game), loop overtimes as long as someone wins, since
-  //final games are no longer broken with a penalty shootout.
   if (finalScore.home == finalScore.away)
   {
     var overtime = playConflict(homeTeam, awayTeam);
@@ -409,6 +407,26 @@ function playMatch(oneTeam, otherTeam, stage)
     }
     finalScore.stage = "overtime";
     periodCount++;
+  }
+
+  //If the game is the final match, keep doing overtimes until a winner is found.
+  //TODO: Find a way to combine this and the previous overtime block so there's no repetition of similar code.
+  if (stage == "final" && finalScore.stage == "overtime" && finalScore.home == finalScore.away)
+  {
+    do
+    {
+      overtime = playConflict(homeTeam, awayTeam);
+      playoffs[group].periods.push(overtime);
+      if (overtime.home > overtime.away)
+      {
+        finalScore.home++;
+      }
+      else if (overtime.home < overtime.away)
+      {
+        finalScore.away++;
+      }
+      periodCount++;
+    } while (finalScore.home == finalScore.away);
   }
 
   //If the game is still a tie, play the penalty shootout.
@@ -796,38 +814,38 @@ function playoffStatistics()
         </thead>
         <tbody>
           <tr>
-            <td className="playoffsBracketHome">{getFlag(playoffs[0].home)}{playoffs[0].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[0].home, playoffs[0].away, "playoffs").home} {playoffWinStages[0]}</td>
+            <td className="playoffsBracketHome">{getFlag(playoffs[0].home)}{playoffs[0].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[0].home, playoffs[0].away, "playoffs").home} {(getMatchResults(playoffs[0].home, playoffs[0].away, "playoffs").winner == playoffs[0].home) ? playoffWinStages[0] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineBottom"></td><td className="playoffsBracketLine"></td>
             <td colSpan="6"></td>
           </tr>
           <tr>
-            <td className="playoffsBracketAway">{getFlag(playoffs[0].away)}{playoffs[0].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[0].home, playoffs[0].away, "playoffs").away} {playoffWinStages[0]}</td>
+            <td className="playoffsBracketAway">{getFlag(playoffs[0].away)}{playoffs[0].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[0].home, playoffs[0].away, "playoffs").away} {(getMatchResults(playoffs[0].home, playoffs[0].away, "playoffs").winner == playoffs[0].away) ? playoffWinStages[0] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineTop playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
             <td colSpan="6"></td>
           </tr>
           <tr>
             <td colSpan="2"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft playoffsBracketLineBottom"></td>
-            <td className="playoffsBracketHome">{getFlag(playoffs[4].home)}{playoffs[4].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[4].home, playoffs[4].away, "playoffs").home} {playoffWinStages[4]}</td>
+            <td className="playoffsBracketHome">{getFlag(playoffs[4].home)}{playoffs[4].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[4].home, playoffs[4].away, "playoffs").home} {(getMatchResults(playoffs[4].home, playoffs[4].away, "playoffs").winner == playoffs[4].home) ? playoffWinStages[4] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineBottom"></td><td className="playoffsBracketLine"></td>
             <td colSpan="2"></td>
           </tr>
           <tr>
             <td colSpan="2"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft playoffsBracketLineTop"></td>
-            <td className="playoffsBracketAway">{getFlag(playoffs[4].away)}{playoffs[4].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[4].home, playoffs[4].away, "playoffs").away} {playoffWinStages[4]}</td>
+            <td className="playoffsBracketAway">{getFlag(playoffs[4].away)}{playoffs[4].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[4].home, playoffs[4].away, "playoffs").away} {(getMatchResults(playoffs[4].home, playoffs[4].away, "playoffs").winner == playoffs[4].away) ? playoffWinStages[4] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineRight playoffsBracketLineTop"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
             <td colSpan="2"></td>
           </tr>
           <tr>
-            <td className="playoffsBracketHome">{getFlag(playoffs[1].home)}{playoffs[1].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[1].home, playoffs[1].away, "playoffs").home} {playoffWinStages[1]}</td>
+            <td className="playoffsBracketHome">{getFlag(playoffs[1].home)}{playoffs[1].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[1].home, playoffs[1].away, "playoffs").home} {(getMatchResults(playoffs[1].home, playoffs[1].away, "playoffs").winner == playoffs[1].home) ? playoffWinStages[1] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineBottom playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
             <td colSpan="2"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
             <td colSpan="2"></td>
           </tr>
           <tr>
-            <td className="playoffsBracketAway">{getFlag(playoffs[1].away)}{playoffs[1].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[1].home, playoffs[1].away, "playoffs").away} {playoffWinStages[1]}</td>
+            <td className="playoffsBracketAway">{getFlag(playoffs[1].away)}{playoffs[1].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[1].home, playoffs[1].away, "playoffs").away} {(getMatchResults(playoffs[1].home, playoffs[1].away, "playoffs").winner == playoffs[1].away) ? playoffWinStages[1] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineTop"></td><td className="playoffsBracketLine"></td>
             <td colSpan="2"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
@@ -837,23 +855,23 @@ function playoffStatistics()
             <td colSpan="6"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft playoffsBracketLineBottom"></td>
             <td className="playoffsBracketHome">{getFlag(playoffs[7].home)}{playoffs[7].home}</td>
-            <td className="playoffsBracketScore">{getMatchResults(playoffs[7].home, playoffs[7].away, "playoffs").home} {playoffWinStages[7]}</td>
+            <td className="playoffsBracketScore">{getMatchResults(playoffs[7].home, playoffs[7].away, "playoffs").home} {(getMatchResults(playoffs[7].home, playoffs[7].away, "playoffs").winner == playoffs[0].home) ? playoffWinStages[7] : <small></small>}</td>
           </tr>
           <tr>
             <td colSpan="6"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft playoffsBracketLineTop"></td>
             <td className="playoffsBracketAway">{getFlag(playoffs[7].away)}{playoffs[7].away}</td>
-            <td className="playoffsBracketScore">{getMatchResults(playoffs[7].home, playoffs[7].away, "playoffs").away} {playoffWinStages[7]}</td>
+            <td className="playoffsBracketScore">{getMatchResults(playoffs[7].home, playoffs[7].away, "playoffs").away} {(getMatchResults(playoffs[7].home, playoffs[7].away, "playoffs").winner == playoffs[7].away) ? playoffWinStages[7] : <small></small>}</td>
           </tr>
           <tr>
-            <td className="playoffsBracketAway">{getFlag(playoffs[2].home)}{playoffs[2].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[2].home, playoffs[2].away, "playoffs").home} {playoffWinStages[2]}</td>
+            <td className="playoffsBracketAway">{getFlag(playoffs[2].home)}{playoffs[2].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[2].home, playoffs[2].away, "playoffs").home} {(getMatchResults(playoffs[2].home, playoffs[2].away, "playoffs").winner == playoffs[2].home) ? playoffWinStages[2] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineBottom"></td><td className="playoffsBracketLine"></td>
             <td colSpan="2"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
             <td colSpan="2"></td>
           </tr>
           <tr>
-            <td className="playoffsBracketHome">{getFlag(playoffs[2].away)}{playoffs[2].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[2].home, playoffs[2].away, "playoffs").away} {playoffWinStages[2]}</td>
+            <td className="playoffsBracketHome">{getFlag(playoffs[2].away)}{playoffs[2].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[2].home, playoffs[2].away, "playoffs").away} {(getMatchResults(playoffs[2].home, playoffs[2].away, "playoffs").winner == playoffs[2].away) ? playoffWinStages[2] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineTop playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
             <td colSpan="2"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
@@ -862,30 +880,30 @@ function playoffStatistics()
           <tr>
             <td colSpan="2"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft playoffsBracketLineBottom"></td>
-            <td className="playoffsBracketAway">{getFlag(playoffs[5].home)}{playoffs[5].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[5].home, playoffs[5].away, "playoffs").home} {playoffWinStages[5]}</td>
+            <td className="playoffsBracketAway">{getFlag(playoffs[5].home)}{playoffs[5].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[5].home, playoffs[5].away, "playoffs").home} {(getMatchResults(playoffs[5].home, playoffs[5].away, "playoffs").winner == playoffs[5].home) ? playoffWinStages[5] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineRight playoffsBracketLineBottom"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
             <td colSpan="2"></td>
           </tr>
           <tr>
             <td colSpan="2"></td>
             <td className="playoffsBracketLine playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft playoffsBracketLineTop"></td>
-            <td className="playoffsBracketHome">{getFlag(playoffs[5].away)}{playoffs[5].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[5].home, playoffs[5].away, "playoffs").away} {playoffWinStages[5]}</td>
+            <td className="playoffsBracketHome">{getFlag(playoffs[5].away)}{playoffs[5].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[5].home, playoffs[5].away, "playoffs").away} {(getMatchResults(playoffs[5].home, playoffs[5].away, "playoffs").winner == playoffs[5].away) ? playoffWinStages[5] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineTop"></td><td className="playoffsBracketLine"></td>
             <th colSpan="2" className="playoffsBracketHeader">Bronze game</th>
           </tr>
           <tr>
-            <td className="playoffsBracketAway">{getFlag(playoffs[3].home)}{playoffs[3].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[3].home, playoffs[3].away, "playoffs").home} {playoffWinStages[3]}</td>
+            <td className="playoffsBracketAway">{getFlag(playoffs[3].home)}{playoffs[3].home}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[3].home, playoffs[3].away, "playoffs").home} {(getMatchResults(playoffs[3].home, playoffs[3].away, "playoffs").winner == playoffs[3].home) ? playoffWinStages[3] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineBottom playoffsBracketLineRight"></td><td className="playoffsBracketLine playoffsBracketLineLeft"></td>
             <td colSpan="4"></td>
             <td className="playoffsBracketHome">{getFlag(playoffs[6].home)}{playoffs[6].home}</td>
-            <td className="playoffsBracketScore">{getMatchResults(playoffs[6].home, playoffs[6].away, "playoffs").home} {playoffWinStages[6]}</td>
+            <td className="playoffsBracketScore">{getMatchResults(playoffs[6].home, playoffs[6].away, "playoffs").home} {(getMatchResults(playoffs[6].home, playoffs[6].away, "playoffs").winner == playoffs[6].home) ? playoffWinStages[0] : <small></small>}</td>
           </tr>
           <tr>
-            <td className="playoffsBracketHome">{getFlag(playoffs[3].away)}{playoffs[3].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[3].home, playoffs[3].away, "playoffs").away} {playoffWinStages[3]}</td>
+            <td className="playoffsBracketHome">{getFlag(playoffs[3].away)}{playoffs[3].away}</td><td className="playoffsBracketScore">{getMatchResults(playoffs[3].home, playoffs[3].away, "playoffs").away} {(getMatchResults(playoffs[3].home, playoffs[3].away, "playoffs").winner == playoffs[0].away) ? playoffWinStages[3] : <small></small>}</td>
             <td className="playoffsBracketLine playoffsBracketLineTop"></td><td className="playoffsBracketLine"></td>
             <td colSpan="4"></td>
             <td className="playoffsBracketAway">{getFlag(playoffs[6].away)}{playoffs[6].away}</td>
-            <td className="playoffsBracketScore">{getMatchResults(playoffs[6].home, playoffs[6].away, "playoffs").away} {playoffWinStages[6]}</td>
+            <td className="playoffsBracketScore">{getMatchResults(playoffs[6].home, playoffs[6].away, "playoffs").away} {(getMatchResults(playoffs[6].home, playoffs[6].away, "playoffs").winner == playoffs[6].away) ? playoffWinStages[6] : <small></small>}</td>
           </tr>
         </tbody>
       </table>
